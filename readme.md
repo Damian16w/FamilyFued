@@ -3,6 +3,11 @@ How to run
 
 open index.html file
 
+create a discord bot
+
+create a .env file and assign these values
+
+
 download python requirements.txt
 run app.py
 run discord.py
