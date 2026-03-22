@@ -7,6 +7,9 @@ import math
 app = Flask(__name__)
 CORS(app)
 
+# Team configuration
+TEAMS = ["Team 1", "Team 2", "Team 3"]
+
 # -----------------------------
 # Data Models & In-Memory State
 # -----------------------------
@@ -24,8 +27,8 @@ def _blank_state() -> Dict[str, Any]:
         "phase": "idle",                # "idle" | "survey" | "ready" | "in_progress" | "ended"
         "answers": [],                    # List[SurveyAnswer]
         "current_team": "Team 1",       # Which team will receive points on reveal
-        "strikes": {"Team 1": 0, "Team 2": 0},
-        "scores": {"Team 1": 0, "Team 2": 0},
+        "strikes": {team: 0 for team in TEAMS},
+        "scores": {team: 0 for team in TEAMS},
         "round_number": 0,
     }
 
@@ -40,8 +43,6 @@ def serialize_state() -> Dict[str, Any]:
         **{k: v for k, v in STATE.items() if k != "answers"},
         "answers": [asdict(a) for a in STATE["answers"]],
     }
-
-# Ensure total points sum to 100 by adjusting the top item if necessary.
 
 def normalize_points(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     total = sum(int(i.get("points", 0)) for i in items)
@@ -72,7 +73,7 @@ def start_round():
         return jsonify({"error": "question required"}), 400
     STATE["question"] = question
     STATE["answers"] = []
-    STATE["strikes"] = {"Team 1": 0, "Team 2": 0}
+    STATE["strikes"] = {team: 0 for team in TEAMS}
     STATE["phase"] = "survey"  # audience submitting answers now via Discord
     STATE["round_number"] += 1
     return jsonify(serialize_state())
@@ -113,8 +114,8 @@ def begin_play():
 def set_team():
     data = request.get_json(force=True)
     team = data.get("team")
-    if team not in ("Team 1", "Team 2"):
-        return jsonify({"error": "team must be 'Team 1' or 'Team 2'"}), 400
+    if team not in TEAMS:
+        return jsonify({"error": f"team must be one of: {', '.join(TEAMS)}"}), 400
     STATE["current_team"] = team
     return jsonify(serialize_state())
 
@@ -152,7 +153,7 @@ def strike():
 
 @app.route("/api/clear_strikes", methods=["POST"])
 def clear_strikes():
-    STATE["strikes"] = {"Team 1": 0, "Team 2": 0}
+    STATE["strikes"] = {team: 0 for team in TEAMS}
     return jsonify(serialize_state())
 
 
