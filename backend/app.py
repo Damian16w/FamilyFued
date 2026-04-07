@@ -1,11 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Any
 import math
+import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Enable CORS for frontend to connect from different port
 
 # Team configuration
 TEAMS = ["Team 1", "Team 2", "Team 3"]
@@ -35,6 +36,28 @@ def _blank_state() -> Dict[str, Any]:
 STATE = _blank_state()
 
 # -----------------------------
+# Frontend Routes
+# -----------------------------
+
+@app.route('/')
+def serve_frontend():
+    """Default route - redirect to host panel"""
+    frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'host.html')
+    return send_file(frontend_path)
+
+@app.route('/host')
+def serve_host():
+    """Host control panel - for the game master"""
+    frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'host.html')
+    return send_file(frontend_path)
+
+@app.route('/player')
+def serve_player():
+    """Player display screen - for projecting/sharing with players"""
+    frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'player.html')
+    return send_file(frontend_path)
+
+# -----------------------------
 # Helpers
 # -----------------------------
 
@@ -52,7 +75,7 @@ def normalize_points(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         return items
     diff = 100 - total
     # Bump the highest-point item by the diff to force total=100
-    max_idx = max(range(len(items)), key=lambda i: items[i]["points"])  # type: ignore
+    max_idx = max(range(len(items)), key=lambda i: items[i]["points"])
     items[max_idx]["points"] += diff
     return items
 
@@ -104,9 +127,11 @@ def survey_results():
 
 @app.route("/api/begin_play", methods=["POST"])
 def begin_play():
+    print(f"Begin play called. Current phase: {STATE['phase']}")  # Debug line
     if STATE["phase"] != "ready":
-        return jsonify({"error": "survey results not ready"}), 400
+        return jsonify({"error": "survey results not ready", "current_phase": STATE["phase"]}), 400
     STATE["phase"] = "in_progress"
+    print(f"Phase changed to: {STATE['phase']}")  # Debug line
     return jsonify(serialize_state())
 
 
@@ -171,5 +196,5 @@ def reset_game():
 
 
 if __name__ == "__main__":
-    # Run on 5000 by default; set host to allow local network access if needed.
+    # Run on port 5000 for backend
     app.run(host="0.0.0.0", port=5000, debug=True)

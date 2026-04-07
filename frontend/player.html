@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Feud – Player Screen</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg-primary: #0a0c10;
+        --bg-secondary: #14161c;
+        --bg-tertiary: #1a1d24;
+        --border: #2a2e38;
+        --text-primary: #e8eaed;
+        --text-secondary: #9aa3b8;
+        --text-muted: #6b7280;
+        
+        --accent: #ffd166;
+        --success: #51cf66;
+        --info: #4d9eff;
+        --danger: #ff6b6b;
+        
+        --team1: #ff6b6b;
+        --team2: #4d9eff;
+        --team3: #51cf66;
+        
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+        --radius-lg: 16px;
+        --radius-md: 12px;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+
+      header {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        border-bottom: 2px solid var(--accent);
+        padding: 1.5rem 2rem;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--accent) 0%, #ff9d66 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .question-section {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .question-label {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--accent);
+        margin-bottom: 1rem;
+      }
+
+      .question-text {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--text-primary);
+      }
+
+      .scoreboard-section {
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: var(--text-secondary);
+      }
+
+      .scoreboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+      }
+
+      .team-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        text-align: center;
+        border: 2px solid var(--border);
+        transition: all 0.3s;
+      }
+
+      .team-card.active {
+        border-color: var(--accent);
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(255, 209, 102, 0.3);
+      }
+
+      .team-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .team1 .team-name { color: var(--team1); }
+      .team2 .team-name { color: var(--team2); }
+      .team3 .team-name { color: var(--team3); }
+
+      .team-score {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1;
+        margin: 0.5rem 0;
+      }
+
+      .team1 .team-score { color: var(--team1); }
+      .team2 .team-score { color: var(--team2); }
+      .team3 .team-score { color: var(--team3); }
+
+      .strikes {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 1rem;
+      }
+
+      .strike {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 107, 107, 0.1);
+        border: 2px solid var(--danger);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        transition: all 0.3s;
+      }
+
+      .strike.active {
+        background: var(--danger);
+        color: white;
+      }
+
+      .answers-section {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        border: 1px solid var(--border);
+      }
+
+      .answers-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .answer-card {
+        background: var(--bg-tertiary);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.3s;
+      }
+
+      /* Animation only happens when revealed class is added */
+      .answer-card.revealed {
+        border-color: var(--success);
+        background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(81, 207, 102, 0.1) 100%);
+        animation: reveal 0.5s ease forwards;
+      }
+
+      .answer-rank {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 60px;
+      }
+
+      .answer-text {
+        font-size: 1.25rem;
+        font-weight: 500;
+        flex: 1;
+        margin-left: 1rem;
+      }
+
+      /* Always blurry until revealed */
+      .answer-card:not(.revealed) .answer-text,
+      .answer-card:not(.revealed) .answer-points {
+        filter: blur(8px);
+        user-select: none;
+      }
+
+      .answer-points {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 70px;
+        text-align: right;
+      }
+
+      .status-badge {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        background: var(--bg-secondary);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid var(--border);
+      }
+
+      @keyframes reveal {
+        0% {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        h1 { font-size: 1.5rem; }
+        .question-text { font-size: 1.5rem; }
+        .team-score { font-size: 2.5rem; }
+        .team-name { font-size: 1rem; }
+        .answers-grid { grid-template-columns: 1fr; }
+        .answer-text { font-size: 1rem; }
+        .answer-points { font-size: 1.25rem; }
+        .strike { width: 30px; height: 30px; }
+      }
+
+      .loading {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+      }
+
+      .round-ended {
+        text-align: center;
+        padding: 3rem;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-lg);
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🎮 FAMILY FEUD</h1>
+      <div class="subtitle">Player Screen • 3 Teams</div>
+    </header>
+
+    <div class="container">
+      <div class="question-section">
+        <div class="question-label">Today's Survey Question</div>
+        <div class="question-text" id="question">Waiting for question...</div>
+      </div>
+
+      <div class="scoreboard-section">
+        <div class="section-title">🏆 SCOREBOARD</div>
+        <div class="scoreboard">
+          <div class="team-card team1" id="team1Card">
+            <div class="team-name">🔴 TEAM 1</div>
+            <div class="team-score" id="score1">0</div>
+            <div class="strikes">
+              <div class="strike" id="t1s1">✘</div>
+              <div class="strike" id="t1s2">✘</div>
+              <div class="strike" id="t1s3">✘</div>
+            </div>
+          </div>
+          <div class="team-card team2" id="team2Card">
+            <div class="team-name">🔵 TEAM 2</div>
+            <div class="team-score" id="score2">0</div>
+            <div class="strikes">
+              <div class="strike" id="t2s1">✘</div>
+              <div class="strike" id="t2s2">✘</div>
+              <div class="strike" id="t2s3">✘</div>
+            </div>
+          </div>
+          <div class="team-card team3" id="team3Card">
+            <div class="team-name">🟢 TEAM 3</div>
+            <div class="team-score" id="score3">0</div>
+            <div class="strikes">
+              <div class="strike" id="t3s1">✘</div>
+              <div class="strike" id="t3s2">✘</div>
+              <div class="strike" id="t3s3">✘</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="answers-section">
+        <div class="section-title">📊 SURVEY RESULTS</div>
+        <div class="answers-grid" id="answers"></div>
+      </div>
+    </div>
+
+    <div class="status-badge" id="phaseBadge">Phase: idle</div>
+
+    <script>
+      const API = "/api";
+      let previousState = null;
+      let answerElements = []; // Store references to answer elements
+      
+      const els = {
+        question: document.getElementById("question"),
+        answers: document.getElementById("answers"),
+        score1: document.getElementById("score1"),
+        score2: document.getElementById("score2"),
+        score3: document.getElementById("score3"),
+        phaseBadge: document.getElementById("phaseBadge"),
+        t1s: [document.getElementById("t1s1"), document.getElementById("t1s2"), document.getElementById("t1s3")],
+        t2s: [document.getElementById("t2s1"), document.getElementById("t2s2"), document.getElementById("t2s3")],
+        t3s: [document.getElementById("t3s1"), document.getElementById("t3s2"), document.getElementById("t3s3")],
+        team1Card: document.getElementById("team1Card"),
+        team2Card: document.getElementById("team2Card"),
+        team3Card: document.getElementById("team3Card"),
+      };
+
+      async function api(path, method = "GET", body = null) {
+        const opts = { method, headers: { "Content-Type": "application/json" } };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(`${API}${path}`, opts);
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        return await res.json();
+      }
+
+      function renderStrikes(strikes) {
+        const strikeMap = {
+          "Team 1": els.t1s,
+          "Team 2": els.t2s,
+          "Team 3": els.t3s
+        };
+        
+        for (const [team, strikeEls] of Object.entries(strikeMap)) {
+          const strikeCount = strikes[team] || 0;
+          strikeEls.forEach((el, idx) => {
+            if (idx < strikeCount) {
+              el.classList.add("active");
+            } else {
+              el.classList.remove("active");
+            }
+          });
+        }
+      }
+
+      function highlightActiveTeam(team) {
+        [els.team1Card, els.team2Card, els.team3Card].forEach(card => {
+          card.classList.remove("active");
+        });
+        if (team === "Team 1") els.team1Card.classList.add("active");
+        if (team === "Team 2") els.team2Card.classList.add("active");
+        if (team === "Team 3") els.team3Card.classList.add("active");
+      }
+
+      // Create or update answer elements without recreating them
+      function updateAnswers(state) {
+        if (!state.answers || state.answers.length === 0) {
+          if (state.phase === "survey") {
+            els.answers.innerHTML = '<div class="loading">📊 Collecting survey answers from Discord...</div>';
+          } else {
+            els.answers.innerHTML = '<div class="loading">🎯 Start a new round to begin!</div>';
+          }
+          answerElements = [];
+          return;
+        }
+
+        // If number of answers changed, rebuild
+        if (answerElements.length !== state.answers.length) {
+          els.answers.innerHTML = '';
+          answerElements = [];
+          
+          state.answers.forEach((a, idx) => {
+            const answerDiv = document.createElement("div");
+            answerDiv.className = "answer-card";
+            answerDiv.innerHTML = `
+              <div class="answer-rank">#${idx + 1}</div>
+              <div class="answer-text">${escapeHtml(a.text)}</div>
+              <div class="answer-points">${a.points}</div>
+            `;
+            els.answers.appendChild(answerDiv);
+            answerElements.push(answerDiv);
+          });
+        }
+        
+        // Update each answer's revealed state without animation loop
+        state.answers.forEach((a, idx) => {
+          const answerEl = answerElements[idx];
+          if (!answerEl) return;
+          
+          const wasRevealed = answerEl.classList.contains("revealed");
+          const isRevealed = a.revealed;
+          
+          if (isRevealed && !wasRevealed) {
+            // Only add animation when first time revealing
+            answerEl.classList.add("revealed");
+            // Remove animation class after animation completes to prevent re-triggering
+            setTimeout(() => {
+              answerEl.style.animation = '';
+            }, 500);
+          } else if (!isRevealed && wasRevealed) {
+            // This shouldn't happen in normal gameplay, but handle it
+            answerEl.classList.remove("revealed");
+          }
+        });
+      }
+
+      function render(state) {
+        // Update question
+        els.question.textContent = state.question || "Waiting for question...";
+        
+        // Update phase
+        els.phaseBadge.textContent = `Phase: ${state.phase}`;
+        
+        // Update scores
+        els.score1.textContent = state.scores["Team 1"] || 0;
+        els.score2.textContent = state.scores["Team 2"] || 0;
+        els.score3.textContent = state.scores["Team 3"] || 0;
+        
+        // Update strikes
+        renderStrikes(state.strikes || { "Team 1": 0, "Team 2": 0, "Team 3": 0 });
+        
+        // Highlight active team
+        highlightActiveTeam(state.current_team);
+
+        // Update answers (preserving DOM elements)
+        updateAnswers(state);
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      async function refresh() {
+        try {
+          const state = await api("/state");
+          render(state);
+          previousState = state;
+        } catch (e) {
+          console.error("Failed to fetch state:", e);
+        }
+      }
+
+      refresh();
+      setInterval(refresh, 1000);
+    </script>
+  </body>
+</html>

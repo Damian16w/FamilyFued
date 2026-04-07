@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Feud – Host Control Panel</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg-primary: #0a0c10;
+        --bg-secondary: #14161c;
+        --bg-tertiary: #1a1d24;
+        --bg-card: #1e2128;
+        --border: #2a2e38;
+        --text-primary: #e8eaed;
+        --text-secondary: #9aa3b8;
+        --text-muted: #6b7280;
+
+        --accent: #ffd166;
+        --accent-hover: #ffdf8c;
+        --accent-text: #1a1a2e;
+
+        --danger: #ff6b6b;
+        --danger-hover: #ff8787;
+        --danger-bg: #2d1a1a;
+
+        --success: #51cf66;
+        --info: #4d9eff;
+
+        --team1: #ff6b6b;
+        --team2: #4d9eff;
+        --team3: #51cf66;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.5;
+      }
+
+      /* Header */
+      header {
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .header-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        background: linear-gradient(
+          135deg,
+          var(--text-primary) 0%,
+          var(--accent) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .badge-group {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.813rem;
+        font-weight: 500;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+      }
+
+      .badge.online {
+        background: rgba(81, 207, 102, 0.15);
+        border-color: var(--success);
+        color: var(--success);
+      }
+
+      /* Main Layout */
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      .dashboard {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 1.5rem;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-lg);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border);
+      }
+
+      .card-header h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .card-header .icon {
+        font-size: 1.25rem;
+      }
+
+      /* Form Elements */
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+      }
+
+      select,
+      input {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        transition: all 0.2s;
+      }
+
+      select:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.1);
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 0.625rem 1rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        background: var(--bg-secondary);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-text);
+        border-color: var(--accent);
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .btn-danger {
+        background: var(--danger-bg);
+        border-color: var(--danger);
+        color: var(--danger);
+      }
+
+      .btn-danger:hover {
+        background: rgba(255, 107, 107, 0.2);
+      }
+
+      .btn-success {
+        background: rgba(81, 207, 102, 0.15);
+        border-color: var(--success);
+        color: var(--success);
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
+      .btn-group-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 1.25rem 0;
+      }
+
+      /* Scoreboard */
+      .scoreboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 0.5rem;
+      }
+
+      .team-card {
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.2s;
+        border: 1px solid var(--border);
+        position: relative;
+      }
+
+      .team-card.active {
+        border: 2px solid var(--accent);
+        box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.2);
+      }
+
+      .team-card:hover {
+        transform: translateY(-2px);
+      }
+
+      .team-name {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .team1 .team-name {
+        color: var(--team1);
+      }
+      .team2 .team-name {
+        color: var(--team2);
+      }
+      .team3 .team-name {
+        color: var(--team3);
+      }
+
+      .team-score {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0.5rem 0;
+        line-height: 1;
+      }
+
+      .team1 .team-score {
+        color: var(--team1);
+      }
+      .team2 .team-score {
+        color: var(--team2);
+      }
+      .team3 .team-score {
+        color: var(--team3);
+      }
+
+      .strikes {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 0.75rem;
+      }
+
+      .strike {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid var(--danger);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+      }
+
+      .strike.active {
+        background: var(--danger);
+        color: white;
+        border-color: var(--danger);
+      }
+
+      /* Answers List for Host */
+      .answers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .answer-item {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s;
+      }
+
+      .answer-item.revealed {
+        border-color: var(--success);
+        background: rgba(81, 207, 102, 0.05);
+      }
+
+      .answer-rank {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 50px;
+      }
+
+      .answer-text {
+        font-size: 1rem;
+        font-weight: 500;
+        flex: 1;
+        margin-left: 1rem;
+      }
+
+      .answer-points {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-right: 1rem;
+        min-width: 60px;
+        text-align: right;
+      }
+
+      .reveal-btn {
+        padding: 0.375rem 1rem;
+        font-size: 0.813rem;
+        background: var(--accent);
+        color: var(--accent-text);
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+
+      .reveal-btn:hover:not(:disabled) {
+        transform: scale(1.05);
+      }
+
+      .reveal-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .text-muted {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+      }
+
+      code {
+        background: var(--bg-tertiary);
+        padding: 0.125rem 0.375rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-family: "Courier New", monospace;
+      }
+
+      /* Scrollbar */
+      .answers-list::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .answers-list::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+        border-radius: 4px;
+      }
+
+      .answers-list::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      .answers-list::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+      }
+
+      @media (max-width: 1024px) {
+        .dashboard {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <h1>🎮 Family Feud — Host Control Panel</h1>
+        <div class="badge-group">
+          <span class="badge" id="phase">idle</span>
+          <span class="badge">Round <span id="round">0</span></span>
+          <span class="badge online" id="backendStatus">🟢 Online</span>
+          <button class="btn" onclick="window.open('/player', '_blank')">
+            📺 Open Player Screen
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="dashboard">
+        <!-- Left Panel - Controls -->
+        <div class="card">
+          <div class="card-header">
+            <span class="icon">🎯</span>
+            <h2>Round Controls</h2>
+          </div>
+
+          <div class="btn-group-vertical">
+            <button class="btn btn-primary" id="btnStartRound">
+              Start New Round
+            </button>
+            <div class="text-muted">
+              After starting, run <code>!start_survey</code> in Discord
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="btn-group-vertical">
+            <button class="btn btn-success" id="btnBeginPlay">
+              Begin Play
+            </button>
+            <div class="text-muted">
+              After Discord survey ends with <code>!end_survey</code>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="card-header">
+            <span class="icon">🎮</span>
+            <h2>Active Team</h2>
+          </div>
+
+          <div class="form-group">
+            <label>Select Current Team</label>
+            <select id="teamSelect">
+              <option value="Team 1">🔴 Team 1</option>
+              <option value="Team 2">🔵 Team 2</option>
+              <option value="Team 3">🟢 Team 3</option>
+            </select>
+          </div>
+          <button class="btn" id="btnSetTeam">Set Active Team</button>
+
+          <div class="divider"></div>
+
+          <div class="card-header">
+            <span class="icon">💥</span>
+            <h2>Strikes</h2>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-danger" id="btnStrike">Add Strike</button>
+            <button class="btn" id="btnClearStrikes">Clear All</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="card-header">
+            <span class="icon">🔄</span>
+            <h2>Game Management</h2>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn" id="btnEndRound">End Round</button>
+            <button class="btn btn-danger" id="btnResetGame">Reset Game</button>
+          </div>
+        </div>
+
+        <!-- Right Panel - Game Display -->
+        <div class="card">
+          <div class="card-header">
+            <span class="icon">🏆</span>
+            <h2>Scoreboard</h2>
+          </div>
+
+          <div class="scoreboard">
+            <div class="team-card team1" id="team1Card">
+              <div class="team-name">🔴 Team 1</div>
+              <div class="team-score" id="score1">0</div>
+              <div class="strikes">
+                <div class="strike" id="t1s1">✘</div>
+                <div class="strike" id="t1s2">✘</div>
+                <div class="strike" id="t1s3">✘</div>
+              </div>
+            </div>
+            <div class="team-card team2" id="team2Card">
+              <div class="team-name">🔵 Team 2</div>
+              <div class="team-score" id="score2">0</div>
+              <div class="strikes">
+                <div class="strike" id="t2s1">✘</div>
+                <div class="strike" id="t2s2">✘</div>
+                <div class="strike" id="t2s3">✘</div>
+              </div>
+            </div>
+            <div class="team-card team3" id="team3Card">
+              <div class="team-name">🟢 Team 3</div>
+              <div class="team-score" id="score3">0</div>
+              <div class="strikes">
+                <div class="strike" id="t3s1">✘</div>
+                <div class="strike" id="t3s2">✘</div>
+                <div class="strike" id="t3s3">✘</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="card-header">
+            <span class="icon">📝</span>
+            <h2>Survey Answers</h2>
+          </div>
+
+          <div class="answers-list" id="answers"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API = "/api";
+
+      const QUESTIONS = [
+        "Name something that absolutely does not belong in a refrigerator",
+        "The worst thing to hear right before a job interview is ____",
+        "What would instantly ruin a wedding ceremony?",
+        "If animals could talk, which one would be the rudest?",
+        "The worst possible roommate habit is ____",
+        "What should never be whispered dramatically?",
+        "The worst thing to discover in your backpack at school is ____",
+        "My retirement plan currently depends on ____",
+        "What would make a terrible national anthem?",
+        "What should never be deep-fried?",
+        "The worst thing to shout during a quiet exam is ____",
+        "If ghosts had hobbies, they would probably ____",
+        "The most suspicious thing to say at an airport is ____",
+        "What would immediately start a supermarket riot?",
+        "The worst motivational quote ever: 'Just ____.'",
+        "What would make a terrible Olympic sport?",
+        "The worst thing to accidentally clap for is ____",
+        "The true purpose of homework is secretly ____",
+        "What would completely ruin time travel?",
+        "The most useless superpower imaginable: ____",
+      ];
+
+      const els = {
+        start: document.getElementById("btnStartRound"),
+        begin: document.getElementById("btnBeginPlay"),
+        teamSel: document.getElementById("teamSelect"),
+        setTeam: document.getElementById("btnSetTeam"),
+        strike: document.getElementById("btnStrike"),
+        clearStrikes: document.getElementById("btnClearStrikes"),
+        endRound: document.getElementById("btnEndRound"),
+        resetGame: document.getElementById("btnResetGame"),
+        answers: document.getElementById("answers"),
+        score1: document.getElementById("score1"),
+        score2: document.getElementById("score2"),
+        score3: document.getElementById("score3"),
+        phase: document.getElementById("phase"),
+        round: document.getElementById("round"),
+        t1s: [
+          document.getElementById("t1s1"),
+          document.getElementById("t1s2"),
+          document.getElementById("t1s3"),
+        ],
+        t2s: [
+          document.getElementById("t2s1"),
+          document.getElementById("t2s2"),
+          document.getElementById("t2s3"),
+        ],
+        t3s: [
+          document.getElementById("t3s1"),
+          document.getElementById("t3s2"),
+          document.getElementById("t3s3"),
+        ],
+        team1Card: document.getElementById("team1Card"),
+        team2Card: document.getElementById("team2Card"),
+        team3Card: document.getElementById("team3Card"),
+        backendStatus: document.getElementById("backendStatus"),
+      };
+
+      function getRandomQuestion() {
+        return QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+      }
+
+      async function api(path, method = "GET", body = null) {
+        const opts = {
+          method,
+          headers: { "Content-Type": "application/json" },
+        };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(`${API}${path}`, opts);
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        return await res.json();
+      }
+
+      function renderStrikes(strikes) {
+        const strikeMap = {
+          "Team 1": els.t1s,
+          "Team 2": els.t2s,
+          "Team 3": els.t3s,
+        };
+
+        for (const [team, strikeEls] of Object.entries(strikeMap)) {
+          const strikeCount = strikes[team] || 0;
+          strikeEls.forEach((el, idx) => {
+            if (idx < strikeCount) {
+              el.classList.add("active");
+            } else {
+              el.classList.remove("active");
+            }
+          });
+        }
+      }
+
+      function highlightActiveTeam(team) {
+        [els.team1Card, els.team2Card, els.team3Card].forEach((card) => {
+          card.classList.remove("active");
+        });
+        if (team === "Team 1") els.team1Card.classList.add("active");
+        if (team === "Team 2") els.team2Card.classList.add("active");
+        if (team === "Team 3") els.team3Card.classList.add("active");
+      }
+
+      function render(state) {
+        els.phase.textContent = state.phase;
+        els.round.textContent = state.round_number;
+        els.score1.textContent = state.scores["Team 1"] || 0;
+        els.score2.textContent = state.scores["Team 2"] || 0;
+        els.score3.textContent = state.scores["Team 3"] || 0;
+        renderStrikes(
+          state.strikes || { "Team 1": 0, "Team 2": 0, "Team 3": 0 },
+        );
+        highlightActiveTeam(state.current_team);
+
+        els.answers.innerHTML = "";
+        (state.answers || []).forEach((a, idx) => {
+          const answerDiv = document.createElement("div");
+          answerDiv.className = "answer-item" + (a.revealed ? " revealed" : "");
+          answerDiv.innerHTML = `
+            <div class="answer-rank">#${idx + 1}</div>
+            <div class="answer-text">${escapeHtml(a.text)}</div>
+            <div class="answer-points">${a.points} pts</div>
+            <button class="reveal-btn" ${a.revealed || state.phase === "survey" || state.phase === "ready" ? "disabled" : ""}>
+              ${a.revealed ? "✓ Revealed" : "🔓 Reveal"}
+            </button>
+          `;
+          const btn = answerDiv.querySelector(".reveal-btn");
+          if (btn && !btn.disabled) {
+            btn.addEventListener("click", async () => {
+              try {
+                await api("/reveal", "POST", {
+                  index: idx,
+                  team: state.current_team,
+                });
+                await refresh();
+              } catch (e) {
+                alert(e.message);
+              }
+            });
+          }
+          els.answers.appendChild(answerDiv);
+        });
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      async function refresh() {
+        try {
+          const state = await api("/state");
+          render(state);
+          els.backendStatus.textContent = "🟢 Online";
+          els.backendStatus.className = "badge online";
+        } catch (e) {
+          els.backendStatus.textContent = "🔴 Offline";
+          els.backendStatus.className = "badge offline";
+        }
+      }
+
+      els.start.addEventListener("click", async () => {
+        const q = getRandomQuestion();
+        try {
+          await api("/start_round", "POST", { question: q });
+          await refresh();
+          alert(
+            `Round started! Question: "${q}"\nNow run !start_survey in Discord`,
+          );
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+
+      els.begin.addEventListener("click", async () => {
+        try {
+          const response = await api("/begin_play", "POST");
+          console.log("Begin play response:", response);
+          await refresh();
+        } catch (e) {
+          console.error("Begin play error:", e);
+          alert(e.message);
+        }
+      });
+
+      els.setTeam.addEventListener("click", async () => {
+        try {
+          await api("/set_team", "POST", { team: els.teamSel.value });
+          await refresh();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+
+      els.strike.addEventListener("click", async () => {
+        try {
+          await api("/strike", "POST", { team: els.teamSel.value });
+          await refresh();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+
+      els.clearStrikes.addEventListener("click", async () => {
+        try {
+          await api("/clear_strikes", "POST");
+          await refresh();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+
+      els.endRound.addEventListener("click", async () => {
+        try {
+          await api("/end_round", "POST");
+          await refresh();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+
+      els.resetGame.addEventListener("click", async () => {
+        if (
+          !confirm(
+            "⚠️ Reset everything? This will clear all scores, strikes, and current round.",
+          )
+        )
+          return;
+        try {
+          await api("/reset_game", "POST");
+          await refresh();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+
+      refresh();
+      setInterval(refresh, 2000);
+    </script>
+  </body>
+</html>

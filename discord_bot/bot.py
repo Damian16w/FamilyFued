@@ -2,10 +2,8 @@ import os
 import discord
 from discord.ext import commands
 from collections import Counter, defaultdict
-import math
 import requests
 import dotenv
-import asyncio
 
 dotenv.load_dotenv()
 
@@ -52,7 +50,7 @@ def scale_to_hundred(counter: Counter) -> list:
 @bot.event
 async def on_ready():
     print(f"✅ Bot connected as {bot.user}")
-    print(f"Commands: !start_survey, !a, !my, !end_survey, !join, !leave, !teams, !assign_team, !balance_teams, !clear_channel, !clear_all_channels, !clear_team_channel")
+    print(f"Commands: !start_survey, !a, !my, !end_survey, !join, !leave, !teams, !assign_team, !balance_teams, !clear_channel")
     print(f"Teams: {', '.join(TEAMS)}")
 
 @bot.command()
@@ -102,7 +100,6 @@ async def leave(ctx):
     if user_id in team_assignments:
         old_team = team_assignments.pop(user_id)
         await ctx.send(f"👋 {ctx.author.mention}, you've left **{old_team}**.")
-        # Remove from any waiting list
         waiting_for_team.pop(user_id, None)
     else:
         await ctx.send("❌ You're not on any team!")
@@ -118,7 +115,6 @@ async def assign_team(ctx, member: discord.Member, team: str):
         await ctx.send(f"❌ Team must be one of: {', '.join(TEAMS)}")
         return
     
-    # Check if user is already on a team
     if user_id in team_assignments:
         old_team = team_assignments[user_id]
         if old_team == team:
@@ -149,7 +145,6 @@ async def teams(ctx):
         await ctx.send("📋 No players have joined teams yet. Use `!join` to join!")
         return
     
-    # Group members by team
     team_members = {team: [] for team in TEAMS}
     for uid, team in team_assignments.items():
         if team in team_members:
@@ -169,7 +164,6 @@ async def teams(ctx):
     waiting = len(waiting_for_team)
     if waiting > 0:
         response += f"\n⏳ **Waiting for assignment:** {waiting} player(s) have used `!join`\n"
-        # Show waiting players
         waiting_names = []
         for uid in waiting_for_team:
             member = ctx.guild.get_member(int(uid))
@@ -177,8 +171,6 @@ async def teams(ctx):
                 waiting_names.append(member.display_name)
         if waiting_names:
             response += "\n".join(f"  • {name}" for name in waiting_names[:10])
-            if len(waiting_names) > 10:
-                response += f"\n  • ... and {len(waiting_names) - 10} more"
     
     await ctx.send(response)
 
@@ -190,26 +182,21 @@ async def balance_teams(ctx):
         await ctx.send("No players waiting for team assignment!")
         return
     
-    # Count current team sizes
     team_counts = {team: 0 for team in TEAMS}
     for team in team_assignments.values():
         if team in team_counts:
             team_counts[team] += 1
     
-    # Sort waiting players
     waiting_players = list(waiting_for_team.keys())
     
-    # Assign to smallest team first
     assignments = []
     for user_id in waiting_players:
-        # Find team with smallest size
         smallest_team = min(team_counts, key=team_counts.get)
         team_counts[smallest_team] += 1
         member = ctx.guild.get_member(int(user_id))
         if member:
             team_assignments[user_id] = smallest_team
             assignments.append(f"{member.display_name} → {smallest_team}")
-            # Try to assign role
             role = discord.utils.get(ctx.guild.roles, name=smallest_team)
             if role:
                 try:
@@ -217,12 +204,11 @@ async def balance_teams(ctx):
                 except:
                     pass
     
-    # Clear waiting list
     waiting_for_team.clear()
     
     if assignments:
         await ctx.send("⚖️ **Teams Balanced!**\n" + "\n".join(assignments))
-        await teams(ctx)  # Show updated teams
+        await teams(ctx)
     else:
         await ctx.send("No players to assign!")
 
@@ -239,61 +225,6 @@ async def clear_channel(ctx, amount: int = 100):
     await ctx.send(f"✅ Cleared {len(deleted) - 1} messages!", delete_after=3)
 
 @bot.command()
-@commands.has_permissions(administrator=True)
-async def clear_all_channels(ctx):
-    """Admin command: Clear all text channels in the server"""
-    await ctx.send("⚠️ **WARNING:** This will clear ALL text channels! Type `confirm` to proceed (this will be deleted in 10 seconds).")
-    
-    def check(m):
-        return m.author == ctx.author and m.content.lower() == "confirm"
-    
-    try:
-        msg = await bot.wait_for('message', timeout=10.0, check=check)
-        await msg.delete()
-        
-        cleared_channels = []
-        failed_channels = []
-        
-        for channel in ctx.guild.text_channels:
-            try:
-                await channel.purge(limit=100, check=lambda m: not m.pinned)
-                cleared_channels.append(channel.name)
-                await asyncio.sleep(0.5)  # Rate limit protection
-            except Exception as e:
-                failed_channels.append(f"{channel.name} ({str(e)})")
-        
-        response = f"✅ **Channel Clear Complete**\n"
-        response += f"Cleared: {', '.join(cleared_channels[:10])}"
-        if len(cleared_channels) > 10:
-            response += f" and {len(cleared_channels) - 10} more"
-        if failed_channels:
-            response += f"\n❌ Failed: {', '.join(failed_channels)}"
-        
-        await ctx.send(response)
-    except asyncio.TimeoutError:
-        await ctx.send("❌ Clear cancelled - confirmation not received.")
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def clear_team_channel(ctx, team: str):
-    """Admin command: Clear messages in a specific team's voice channel text chat"""
-    team = team.strip()
-    if team not in TEAMS:
-        await ctx.send(f"❌ Team must be one of: {', '.join(TEAMS)}")
-        return
-    
-    # Look for text channels that might be associated with the team
-    channel_name = f"{team.lower().replace(' ', '-')}-chat"
-    channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
-    
-    if not channel:
-        await ctx.send(f"❌ Could not find channel `{channel_name}`. Make sure it exists.")
-        return
-    
-    await channel.purge(limit=100, check=lambda m: not m.pinned)
-    await ctx.send(f"✅ Cleared **{channel_name}** channel!")
-
-@bot.command()
 async def end_survey(ctx):
     global survey_open
     if not survey_open:
@@ -301,7 +232,6 @@ async def end_survey(ctx):
         return
     survey_open = False
 
-    # Aggregate and scale
     all_answers = []
     for answers in submissions_by_user.values():
         all_answers.extend(answers)
@@ -309,12 +239,10 @@ async def end_survey(ctx):
 
     scaled = scale_to_hundred(counter)
 
-    # POST to backend
     try:
         resp = requests.post(f"{BACKEND_URL}/api/survey_results", json={"answers": scaled}, timeout=10)
         if resp.status_code == 200:
             await ctx.send("📊 Survey closed. Results sent to the game!")
-            # Show a compact preview
             preview = "\n".join([f"{i+1}. {x['text']} — {x['points']}" for i, x in enumerate(scaled[:10])])
             if not preview:
                 preview = "(no answers)"
@@ -324,7 +252,6 @@ async def end_survey(ctx):
     except Exception as e:
         await ctx.send(f"⚠️ Failed to reach backend: {e}")
 
-# Error handling
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
